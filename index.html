@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blockchain Voting System</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ================= BODY ================= */
+body{
+    font-family:'Poppins',sans-serif;
+    padding:20px;
+    margin:0;
+    text-align:center;
+    background-image:url("background.png");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+}
+
+/* ================= MENU ================= */
+.menu-btn{
+    position:fixed;
+    left:20px;
+    top:20px;
+    font-size:26px;
+    cursor:pointer;
+    background:#2c3e50;
+    color:white;
+    padding:8px 12px;
+    border-radius:6px;
+    z-index:1000;
+}
+
+.sidebar{
+    position:fixed;
+    left:-230px;
+    top:0;
+    width:220px;
+    height:100%;
+    background:#34495e;
+    padding-top:60px;
+    transition:0.3s;
+    z-index:999;
+}
+
+.sidebar h3{
+    color:white;
+    text-align:center;
+}
+
+.sidebar a{
+    display:block;
+    color:white;
+    padding:15px 20px;
+    text-decoration:none;
+}
+
+.sidebar a:hover{
+    background:#2c3e50;
+}
+
+/* ================= TOP BAR ================= */
+.top-bar{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:20px;
+}
+
+.wallet-btn{
+    padding:10px 20px;
+    font-size:16px;
+    cursor:pointer;
+    background:#f6851b;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+}
+
+.wallet-btn:hover{
+    background:#e2761b;
+}
+
+/* ================= CONTAINER ================= */
+.container{
+    max-width:700px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ================= CANDIDATES ================= */
+.vote-section{
+    display:flex;
+    justify-content:space-around;
+    margin:20px 0;
+    flex-wrap:wrap;
+    gap:20px;
+}
+
+.candidate-card{
+    background:#fff;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    width:220px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.candidate-card img{
+    width:80px;
+    height:80px;
+    object-fit:contain;
+    border-radius:50%;
+    margin-bottom:10px;
+}
+
+/* ================= BUTTON ================= */
+.vote-btn{
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+    background:#3498db;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.vote-btn:hover{
+    background:#2980b9;
+}
+
+/* ================= RESULT & RECORD ================= */
+.result-box,.record-box{
+    background:#f0f0f0;
+    padding:15px;
+    border-radius:8px;
+    margin-top:15px;
+    white-space:pre-line;
+    text-align:left;
+    overflow:auto;
+}
+
+/* ================= PROGRESS BAR ================= */
+.progress-container{
+    margin-top:20px;
+}
+
+.progress-box{
+    margin-bottom:15px;
+    text-align:left;
+}
+
+.progress-bar-bg{
+    width:100%;
+    height:25px;
+    background:#eaeaea;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    color:white;
+    text-align:center;
+    line-height:25px;
+    font-weight:bold;
+    transition:width 0.5s ease;
+}
+
+.ncp{
+    background:linear-gradient(90deg,#1e8449,#27ae60);
+}
+
+.bnp{
+    background:linear-gradient(90deg,#c0392b,#e74c3c);
+}
+
+/* ================= KYC ================= */
+.kyc-box{
+    display:none;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    margin-top:20px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+</style>
+</head>
+
+<body>
+
+<!-- LEFT MENU -->
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+<div id="sidebar" class="sidebar">
+<h3>Menu</h3>
+<a href="#" onclick="openKYC()">✔ Verification</a>
+</div>
+
+<!-- WALLET BUTTON -->
+<div class="top-bar">
+<button id="connectBtn" onclick="connectWallet()" class="wallet-btn">🔗 Connect MetaMask</button>
+</div>
+
+<div class="container">
+<h1>🗳 Blockchain Voting System</h1>
+
+<!-- CANDIDATE VOTE SECTION -->
+<div class="vote-section">
+<div class="candidate-card">
+<img src="ncp_logo.png" alt="NCP">
+<h2>NCP</h2>
+<button onclick="vote(0)" class="vote-btn">Vote</button>
+</div>
+<div class="candidate-card">
+<img src="bnp_logo.png" alt="BNP">
+<h2>BNP</h2>
+<button onclick="vote(1)" class="vote-btn">Vote</button>
+</div>
+</div>
+
+<h3>📊 Current Votes</h3>
+<div class="result-box" id="results">No votes yet</div>
+
+<h3>📊 Vote Progress</h3>
+<div class="progress-container">
+<div class="progress-box">
+<strong>NCP</strong>
+<div class="progress-bar-bg">
+<div id="bar0" class="progress-bar ncp">0%</div>
+</div>
+</div>
+<div class="progress-box">
+<strong>BNP</strong>
+<div class="progress-bar-bg">
+<div id="bar1" class="progress-bar bnp">0%</div>
+</div>
+</div>
+</div>
+
+<h3>📝 Vote Records</h3>
+<div class="record-box" id="output">No records yet</div>
+
+<!-- KYC SECTION -->
+<div id="kycSection" class="kyc-box">
+<h3>🔐 Voter Verification (KYC)</h3>
+<input type="text" id="name" placeholder="Full Name"><br><br>
+<input type="text" id="nid" placeholder="NID Number"><br><br>
+<button onclick="submitKYC()" class="vote-btn">Submit Verification</button>
+<p id="kycStatus"></p>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+<script>
+/* ================= SIDEBAR ================= */
+function toggleMenu(){
+    const sidebar=document.getElementById("sidebar");
+    sidebar.style.left = sidebar.style.left==="0px" ? "-230px" : "0px";
+}
+
+/* ================= KYC ================= */
+function openKYC(){ document.getElementById("kycSection").style.display="block"; }
+function submitKYC(){
+    const name=document.getElementById("name").value;
+    const nid=document.getElementById("nid").value;
+    if(!name || !nid){ alert("Fill all fields"); return; }
+    document.getElementById("kycStatus").innerText="Verification Submitted ✅";
+}
+
+/* ================= BLOCKCHAIN SIM ================= */
+class Block{
+    constructor(index, timestamp, vote, previousHash=''){
+        this.index=index; this.timestamp=timestamp; this.vote=vote; this.previousHash=previousHash; this.hash='';
+    }
+    async calculateHash(){
+        const msgBuffer = new TextEncoder().encode(this.index+this.timestamp+this.vote+this.previousHash);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+}
+class Blockchain{
+    constructor(){ this.chain=[]; this.init(); }
+    async init(){ const g = await this.createGenesisBlock(); this.chain.push(g); }
+    async createGenesisBlock(){ let b=new Block(0,"01/01/2026","Genesis Block","0"); b.hash=await b.calculateHash(); return b; }
+    getLatestBlock(){ return this.chain[this.chain.length-1]; }
+    async addBlock(b){ b.previousHash=this.getLatestBlock().hash; b.hash=await b.calculateHash(); this.chain.push(b); }
+}
+let voteChain=new Blockchain();
+
+/* ================= WEB3 ================= */
+let web3; let contract; let isConnected=false; let userAddress="";
+const contractAddress="0x779EC43e6A218d69265597b93C1647eCedE39656";
+const abi=[
+{"inputs":[{"internalType":"uint256","name":"candidateId","type":"uint256"}],"name":"vote","outputs":[],"stateMutability":"nonpayable","type":"function"},
+{"inputs":[{"internalType":"uint256","name":"candidateId","type":"uint256"}],"name":"getVote","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+];
+
+/* ================= CONNECT WALLET ================= */
+async function connectWallet(){
+    const btn=document.getElementById("connectBtn");
+    if(!isConnected){
+        if(window.ethereum){
+            try{
+                await window.ethereum.request({method:"eth_requestAccounts"});
+                web3=new Web3(window.ethereum);
+                const accounts=await web3.eth.getAccounts();
+                userAddress=accounts[0];
+                contract=new web3.eth.Contract(abi,contractAddress);
+                btn.innerText=userAddress.slice(0,6)+"..."+userAddress.slice(-4);
+                isConnected=true;
+                document.querySelectorAll(".vote-btn").forEach(b=>b.disabled=false);
+            }catch(e){ alert("Connection failed"); console.log(e);}
+        }else{ alert("Install MetaMask"); }
+    }else{
+        userAddress=""; isConnected=false; web3=null; contract=null;
+        btn.innerText="🔗 Connect MetaMask";
+        document.querySelectorAll(".vote-btn").forEach(b=>b.disabled=true);
+    }
+}
+
+/* ================= VOTE FUNCTION ================= */
+async function vote(id){
+    if(!isConnected){ alert("Connect wallet first"); return; }
+    const partyNames=["NCP","BNP"];
+    const candidateName=partyNames[id]||"Unknown";
+    try{
+        const accounts=await web3.eth.getAccounts();
+        await contract.methods.vote(id).send({from:accounts[0]});
+        alert("Vote Submitted!");
+        const timestamp=new Date().toLocaleString();
+        const block=new Block(voteChain.chain.length, timestamp, `${accounts[0].slice(0,6)}... voted for ${candidateName} at ${timestamp}`);
+        await voteChain.addBlock(block);
+        updateVoteRecords();
+        fetchResults();
+    }catch(e){ alert("Transaction failed"); console.log(e);}
+}
+
+/* ================= UPDATE RECORDS ================= */
+function updateVoteRecords(){
+    const records=voteChain.chain.filter(b=>b.vote!=="Genesis Block").map(b=>b.vote).join("\n");
+    document.getElementById("output").innerText=records;
+}
+
+/* ================= FETCH RESULTS ================= */
+async function fetchResults(){
+    if(!contract || !isConnected) return;
+    const partyNames=["NCP","BNP"];
+    let text="";
+    for(let i=0;i<partyNames.length;i++){
+        const votes=parseInt(await contract.methods.getVote(i).call());
+        text+=`${partyNames[i]}: ${votes} votes\n`;
+        const pct=document.getElementById(`bar${i}`);
+        const total = parseInt(await contract.methods.getVote(0).call())+parseInt(await contract.methods.getVote(1).call());
+        const pctVal= total? Math.round((votes/total)*100):0;
+        pct.style.width=pctVal+"%"; pct.innerText=pctVal+"%";
+    }
+    document.getElementById("results").innerText=text;
+}
+
+/* ================= DISABLE VOTE BUTTONS INITIALLY ================= */
+document.querySelectorAll(".vote-btn").forEach(b=>b.disabled=true);
+</script>
+</body>
+</html>
